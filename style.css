@@ -56,6 +56,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Menü geçiş animasyonu */
+    transition: opacity 0.3s;
 }
 
 .menu-content {
@@ -137,6 +139,22 @@ body {
     z-index: 10; 
 }
 
+/* --- YENİ EKLENEN AÇILIŞ ANİMASYONU --- */
+.game-enter {
+    animation: gamePopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes gamePopIn {
+    from { 
+        opacity: 0; 
+        transform: scale(0.6); /* Küçük başla */
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1); /* Normale dön */
+    }
+}
+
 #hud-container {
     width: 90%;
     max-width: 420px;
@@ -144,7 +162,7 @@ body {
     justify-content: space-between;
     margin-bottom: 5px;
     z-index: 50;
-    position: relative; /* Bonus yazısı buna göre hizalanabilir */
+    position: relative; 
 }
 
 .hud-box {
@@ -205,15 +223,7 @@ body {
     transition: box-shadow 0.2s, border-color 0.2s;
 }
 
-/* Animasyonu sadece oyun ilk açıldığında script ile ekleyeceğiz */
-.grid.start-animation {
-    animation: gridIntro .8s ease forwards;
-}
-@keyframes gridIntro {
-    from {opacity: 0; transform: scale(.7);}
-    to   {opacity: 1; transform: scale(1);}
-}
-
+/* Hata Animasyonu */
 .grid.error-shake {
     animation: shakeRed 0.4s ease-in-out;
     box-shadow: 0 0 30px #ff0000, inset 0 0 10px #ff0000;
@@ -233,9 +243,6 @@ body {
     75% { transform: translate(-5px, 0) scale(1); }
     100% { transform: translate(0, 0) scale(1); }
 }
-
-.grid.fade-out { opacity: .3; transition: opacity .4s; }
-.grid.fade-in  { opacity: 1;  transition: opacity .4s; }
 
 /* ====================== HÜCRE ====================== */
 .cell {
@@ -300,23 +307,22 @@ body {
     to   {transform: translate(var(--dx),var(--dy)) scale(.1); opacity: 0;}
 }
 
-/* ====================== YENİ: KAYAN BONUS YAZISI ====================== */
+/* KAYAN BONUS YAZISI */
 .floating-bonus {
-    position: fixed; /* Ekranda sabit duracak */
+    position: fixed; 
     color: #ffd700;
     font-weight: bold;
     font-size: 16px;
     text-shadow: 0 0 5px #ff8800;
     pointer-events: none;
     z-index: 1000;
-    /* Aşağıdan yukarı kayma ve yok olma animasyonu */
     animation: floatUpFade 2s ease-out forwards;
 }
 
 @keyframes floatUpFade {
     0% { opacity: 0; transform: translateY(20px); }
     20% { opacity: 1; transform: translateY(0); }
-    70% { opacity: 1; transform: translateY(0); } /* Biraz bekle */
+    70% { opacity: 1; transform: translateY(0); } 
     100% { opacity: 0; transform: translateY(-30px); }
 }
 
