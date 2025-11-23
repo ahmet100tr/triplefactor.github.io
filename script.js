@@ -161,7 +161,7 @@ function spawnParticles(i) {
     }
 }
 
-/* ====================== PUANLAMA & BONUS EFEKTİ ====================== */
+/* ====================== PUANLAMA & BONUS ====================== */
 function popRow(r) {
     let base = r * COLS;
     let earnedPoints = 0;
@@ -176,10 +176,10 @@ function popRow(r) {
         
         let point = 3;
         
-        // Asal Sayı Kontrolü
+        // Asal Sayı Bonusu
         if(val === 2 || val === 3 || val === 5) {
             point += 7; 
-            bonusPoints += 7; // Bonus miktarını ayrıca topla
+            bonusPoints += 7; 
         }
         
         earnedPoints += point;
@@ -187,7 +187,7 @@ function popRow(r) {
     totalPopped += 3;
     globalScore += earnedPoints;
     
-    // Eğer Asal Sayı Bonusu kazanıldıysa efekti göster
+    // Bonus Efekti
     if(bonusPoints > 0) {
         showFloatingBonus(bonusPoints);
     }
@@ -196,9 +196,7 @@ function popRow(r) {
     updateScoreUI();
 }
 
-// YENİ FONKSİYON: Kayan Bonus Yazısı
 function showFloatingBonus(amount) {
-    // Puan kutusunun konumunu bul
     let scoreBox = document.querySelector(".score-box");
     if(!scoreBox) return;
     let rect = scoreBox.getBoundingClientRect();
@@ -207,13 +205,12 @@ function showFloatingBonus(amount) {
     floater.className = "floating-bonus";
     floater.textContent = "Asal Sayı Bonusu +" + amount;
     
-    // Konumu: Puan kutusunun biraz solu ve aşağısı
-    floater.style.left = (rect.left - 20) + "px"; 
-    floater.style.top = (rect.bottom + 10) + "px";
+    // Ekranın sağına yaslı olduğu için biraz sola alıyoruz
+    floater.style.left = (rect.left - 40) + "px"; 
+    floater.style.top = (rect.bottom + 5) + "px";
 
     document.body.appendChild(floater);
 
-    // Animasyon bitince (2sn) sil
     setTimeout(() => {
         floater.remove();
     }, 2000);
@@ -250,8 +247,6 @@ function isStuck() {
 async function reshuffle() {
     showMsg("Karıştırılıyor...");
     let g = document.getElementById("grid");
-    // Grid kaybolmasın diye fade-out efektini de kaldırabiliriz veya hafifletebiliriz.
-    // Şimdilik hafif soluklaşsın ama yok olmasın.
     g.style.opacity = "0.5"; 
     await delay(350);
 
@@ -266,7 +261,7 @@ async function reshuffle() {
         if (!isStuck()) ok = true;
     }
 
-    g.style.opacity = "1"; // Geri parlak yap
+    g.style.opacity = "1"; 
     await delay(350);
     showMsg("Hazır ✔️");
 }
@@ -304,8 +299,6 @@ async function generatePlayableBoard() {
         if (findMatches().length > 0) continue;
         if (!isStuck()) ok = true;
     }
-    // DÜZELTME: Burada "start-animation" ekleyip çıkarmayı sildim.
-    // Grid artık hep sabit kalacak.
 }
 
 async function startLevel(lvl) {
@@ -313,8 +306,15 @@ async function startLevel(lvl) {
     totalPopped = 0;
     
     document.getElementById("menu").style.display = "none";
-    document.getElementById("game").style.display = "flex";
+    let gameEl = document.getElementById("game");
+    gameEl.style.display = "flex";
     
+    // --- OYUN AÇILIŞ ANİMASYONU ---
+    // Önce sınıfı kaldır, sonra tekrar ekle ki animasyon baştan oynasın
+    gameEl.classList.remove("game-enter");
+    void gameEl.offsetWidth; // CSS Reflow tetikleyici
+    gameEl.classList.add("game-enter");
+
     let targetEl = document.getElementById("targetVal");
     if(targetEl) targetEl.textContent = lvl; 
     
