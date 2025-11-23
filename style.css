@@ -1,57 +1,211 @@
-/* ====================== TEMA ====================== */
+/* ====================== TEMA (DERİN UZAY) ====================== */
 body {
     margin: 0;
-    background: linear-gradient(180deg, #0b0f3b, #2d004d 40%, #300000 100%);
-    color: #fff;
-    font-family: Arial, sans-serif;
+    padding: 0;
+    background: radial-gradient(circle at center, #0b1026 0%, #000000 100%);
+    background-size: 200% 200%; 
+    animation: deepSpaceMove 30s ease infinite alternate;
+    color: #e0f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
+    user-select: none; 
+    -webkit-user-select: none;
+    height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+    position: relative;
+}
+
+@keyframes deepSpaceMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 50% 100%; }
+}
+
+#background-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1; 
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bg-star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+    animation: twinkleFloat 5s infinite ease-in-out alternate;
+}
+
+@keyframes twinkleFloat {
+    0% { opacity: 0.3; transform: scale(0.8) translateY(0); }
+    100% { opacity: 1; transform: scale(1.2) translateY(-20px); }
 }
 
 /* ====================== MENÜ ====================== */
 #menu {
     width: 100%;
-    height: 100vh;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 30; 
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
-.menu-title {
-    font-size: 48px;
-    margin-bottom: 40px;
-    text-shadow: 0 0 20px #ff00ff;
+
+.menu-content {
+    width: 90%;
+    height: 95%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
 }
-.level-btn {
-    padding: 15px 40px;
-    margin: 10px;
-    font-size: 22px;
-    background: #5200a8;
-    border: 2px solid #ff0088;
+
+.menu-title {
+    font-size: clamp(28px, 5vh, 48px);
+    text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff; 
+    text-align: center;
     color: #fff;
+    margin: 0;
+}
+
+.total-score-display {
+    font-size: clamp(18px, 3vh, 24px);
+    color: #ffd700;
+    text-shadow: 0 0 10px #ff8800;
+    font-weight: bold;
+    margin: 0;
+}
+
+.levels-scroll-area {
+    width: 100%;
+    height: 65%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.levels-container {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr); 
+    gap: 8px;
+}
+
+.level-btn {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(16px, 2.5vh, 28px);
+    background: rgba(0, 20, 60, 0.7);
+    border: 2px solid #00ffff;
+    color: #00ffff;
     border-radius: 12px;
     cursor: pointer;
     transition: .2s;
-}
-.level-btn:hover {
-    background: #7a00e8;
-    transform: scale(1.05);
+    touch-action: manipulation;
+    font-weight: bold;
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
 }
 
-/* ====================== OYUN ====================== */
+.level-btn:hover {
+    background: #00ffff;
+    color: #000;
+    transform: scale(1.02);
+}
+
+/* ====================== OYUN ALANI ====================== */
 #game {
     display: none;
-    text-align: center;
-    padding-top: 20px;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    padding-top: 10px;
+    z-index: 10; 
 }
+
+#hud-container {
+    width: 90%;
+    max-width: 420px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    z-index: 50;
+    position: relative; /* Bonus yazısı buna göre hizalanabilir */
+}
+
+.hud-box {
+    background: rgba(0, 5, 25, 0.85);
+    border: 1px solid #0088ff;
+    border-radius: 8px;
+    padding: 5px 8px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 10px rgba(0, 136, 255, 0.3);
+    flex: 1;
+    margin: 0 2px;
+}
+
+.hud-box.score-box {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.hud-label {
+    font-size: 9px;
+    color: #88ccff;
+    letter-spacing: 1px;
+}
+.score-box .hud-label { color: #ffeebb; }
+
+.hud-value {
+    font-size: clamp(14px, 2.5vh, 20px);
+    font-weight: bold;
+    color: #fff;
+}
+.score-box .hud-value { color: #ffd700; }
+
+/* ====================== GRID ====================== */
 .grid {
-    width: 300px;
-    margin: auto;
+    height: 72vh; 
+    max-height: 600px; 
+    aspect-ratio: 3 / 6; 
+    width: auto; 
+    margin: 0 auto;
+
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, 1fr);
     gap: 6px;
-    opacity: 0;
-    transform: scale(.85);
+    
+    z-index: 20; 
+    opacity: 1; 
+    transform: scale(1); 
+    
+    border-radius: 12px;
+    border: 3px solid #00ffff;
+    padding: 6px;
+    background: rgba(0, 2, 20, 0.85); 
+    box-shadow: 
+        0 0 20px rgba(0, 255, 255, 0.4),
+        inset 0 0 20px rgba(0, 20, 60, 0.8);
+    transition: box-shadow 0.2s, border-color 0.2s;
 }
+
+/* Animasyonu sadece oyun ilk açıldığında script ile ekleyeceğiz */
 .grid.start-animation {
     animation: gridIntro .8s ease forwards;
 }
@@ -59,103 +213,152 @@ body {
     from {opacity: 0; transform: scale(.7);}
     to   {opacity: 1; transform: scale(1);}
 }
+
+.grid.error-shake {
+    animation: shakeRed 0.4s ease-in-out;
+    box-shadow: 0 0 30px #ff0000, inset 0 0 10px #ff0000;
+    border-color: #ff0000;
+}
+.grid.error-shake .cell {
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 10px #ff0000, inset 0 0 5px #ff0000 !important;
+    color: #ffcccc !important;
+    transition: none;
+}
+
+@keyframes shakeRed {
+    0% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(-5px, 0) scale(1); }
+    50% { transform: translate(5px, 0) scale(1); }
+    75% { transform: translate(-5px, 0) scale(1); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
 .grid.fade-out { opacity: .3; transition: opacity .4s; }
 .grid.fade-in  { opacity: 1;  transition: opacity .4s; }
 
 /* ====================== HÜCRE ====================== */
 .cell {
-    width: 90px;
-    height: 90px;
-    background: #1c0033;
-    border-radius: 12px;
-    border: 2px solid #ff00aa;
+    width: 100%;
+    height: 100%;
+    background: rgba(2, 12, 27, 0.9);
+    border-radius: 8px;
+    border: 2px solid #0088ff;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 28px;
-    color: #ff77ff;
+    font-size: clamp(14px, 4vmin, 28px); 
+    color: #aaddff;
+    text-shadow: 0 0 5px #0088ff;
     position: relative;
     overflow: visible;
-    transition: transform .18s ease;
+    transition: transform .18s ease, border-color 0.2s, box-shadow 0.2s;
+    cursor: grab;
+    touch-action: none;
+    z-index: 25; 
 }
-.cell.swap-anim {
-    transform: translateY(var(--dy));
+.cell:active { cursor: grabbing; border-color: #00ffff; }
+.cell.swap-anim { transform: translateY(var(--dy)); z-index: 30; box-shadow: 0 0 15px #00ffff; }
+
+/* ASAL SAYILAR */
+.cell.prime-2 {
+    border-color: #ff0055; color: #ffccdd; text-shadow: 0 0 10px #ff0055; box-shadow: inset 0 0 10px rgba(255, 0, 85, 0.3);
+}
+.cell.prime-3 {
+    border-color: #00ff66; color: #ccffdd; text-shadow: 0 0 10px #00ff66; box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.3);
+}
+.cell.prime-5 {
+    border-color: #ffcc00; color: #ffffcc; text-shadow: 0 0 10px #ffcc00; box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.3);
 }
 
-/* ====================== MESAJ ====================== */
 #msg {
-    height: 32px;
-    margin-top: 14px;
-    font-size: 19px;
-    color: #ffbbbb;
+    height: 4vh;
+    font-size: clamp(12px, 2vh, 18px);
+    color: #00ffff;
+    text-shadow: 0 0 5px #00ffff;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+    z-index: 50;
 }
 
-/* ====================== PATLAMA PARÇACIKLARI ====================== */
 .particle {
     position: absolute;
-    width: 6px;
-    height: 6px;
-    background: radial-gradient(circle, #ff55ff, #ff0088);
+    width: 5px;
+    height: 5px;
+    background: radial-gradient(circle, #ffffff, #00ffff);
     border-radius: 50%;
     pointer-events: none;
     animation: explode .6s linear forwards;
-    z-index: 50;
+    z-index: 60;
+    box-shadow: 0 0 10px #00ffff;
 }
 @keyframes explode {
     from {transform: translate(0,0) scale(1); opacity: 1;}
     to   {transform: translate(var(--dx),var(--dy)) scale(.1); opacity: 0;}
 }
 
-/* ====================== ZAFER EKRANI STİLLERİ ====================== */
+/* ====================== YENİ: KAYAN BONUS YAZISI ====================== */
+.floating-bonus {
+    position: fixed; /* Ekranda sabit duracak */
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 0 5px #ff8800;
+    pointer-events: none;
+    z-index: 1000;
+    /* Aşağıdan yukarı kayma ve yok olma animasyonu */
+    animation: floatUpFade 2s ease-out forwards;
+}
+
+@keyframes floatUpFade {
+    0% { opacity: 0; transform: translateY(20px); }
+    20% { opacity: 1; transform: translateY(0); }
+    70% { opacity: 1; transform: translateY(0); } /* Biraz bekle */
+    100% { opacity: 0; transform: translateY(-30px); }
+}
+
+/* ====================== ZAFER EKRANI ====================== */
 #victoryOverlay {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 2, 15, 0.95);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 100;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
 }
 .victory-box {
-    background: linear-gradient(135deg, #2d004d, #000);
-    border: 4px solid #ff00ff;
-    padding: 40px 60px;
+    width: 85%;
+    max-width: 400px;
+    background: linear-gradient(135deg, #001f3f, #000);
+    border: 3px solid #00ffff;
+    padding: 20px;
     border-radius: 20px;
     text-align: center;
-    box-shadow: 0 0 50px #ff00ff;
+    box-shadow: 0 0 50px #0088ff;
     transform: scale(0);
     animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
-.victory-title {
-    font-size: 60px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00aa;
-    margin-bottom: 10px;
-}
-.victory-desc {
-    font-size: 24px;
-    color: #ffbbbb;
-    margin-bottom: 30px;
-}
+.victory-title { font-size: clamp(28px, 5vh, 50px); font-weight: bold; color: #fff; text-shadow: 0 0 20px #00ffff; margin-bottom: 10px; }
+.victory-desc { font-size: clamp(16px, 2.5vh, 22px); color: #aaddff; margin-bottom: 10px; }
+.victory-score { font-size: clamp(18px, 3vh, 26px); color: #ffd700; margin-bottom: 20px; font-weight: bold; }
+
 .menu-btn {
-    padding: 15px 30px;
-    font-size: 20px;
-    background: #ff0088;
+    padding: 12px 0;
+    font-size: 18px;
+    background: #0088ff;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: transform 0.2s, background 0.2s;
+    width: 100%;
+    font-weight: bold;
 }
-.menu-btn:hover {
-    background: #ff44aa;
-    transform: scale(1.1);
-}
-
-@keyframes popIn {
-    from { transform: scale(0); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
-}
+.menu-btn:hover { background: #00ffff; color: #000; transform: scale(1.05); }
+@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
