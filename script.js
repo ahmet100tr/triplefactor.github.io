@@ -14,7 +14,7 @@ let hintTimer = null;
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
-    if (audioCtx.state === 'suspended') audioCtx.resume(); // Tarayıcı kilidini aç
+    if (audioCtx.state === 'suspended') audioCtx.resume(); 
 
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -25,7 +25,6 @@ function playSound(type) {
     const now = audioCtx.currentTime;
 
     if (type === 'move') {
-        // İnce, hızlı bir "swoosh" sesi
         osc.type = 'sine';
         osc.frequency.setValueAtTime(300, now);
         osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
@@ -35,7 +34,6 @@ function playSound(type) {
         osc.stop(now + 0.1);
     } 
     else if (type === 'pop') {
-        // Tok bir patlama sesi
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(400, now);
         osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
@@ -45,7 +43,6 @@ function playSound(type) {
         osc.stop(now + 0.15);
     }
     else if (type === 'bonus') {
-        // Asal sayı için kristal/çan sesi (Yüksek frekans)
         osc.type = 'sine';
         osc.frequency.setValueAtTime(800, now);
         osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
@@ -55,7 +52,6 @@ function playSound(type) {
         osc.stop(now + 0.3);
     }
     else if (type === 'error') {
-        // Kalın, testere dişi bir hata sesi
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(150, now);
         osc.frequency.linearRampToValueAtTime(100, now + 0.2);
@@ -65,7 +61,6 @@ function playSound(type) {
         osc.stop(now + 0.2);
     }
     else if (type === 'hint') {
-        // Ceza sesi (Negatif ton)
         osc.type = 'square';
         osc.frequency.setValueAtTime(200, now);
         osc.frequency.linearRampToValueAtTime(100, now + 0.3);
@@ -75,15 +70,13 @@ function playSound(type) {
         osc.stop(now + 0.3);
     }
     else if (type === 'win') {
-        // Zafer melodisi (Arpej)
-        playNote(523.25, now, 0.1); // C5
-        playNote(659.25, now + 0.1, 0.1); // E5
-        playNote(783.99, now + 0.2, 0.2); // G5
-        playNote(1046.50, now + 0.4, 0.4); // C6
+        playNote(523.25, now, 0.1); 
+        playNote(659.25, now + 0.1, 0.1); 
+        playNote(783.99, now + 0.2, 0.2); 
+        playNote(1046.50, now + 0.4, 0.4); 
     }
 }
 
-// Zafer melodisi için yardımcı fonksiyon
 function playNote(freq, time, dur) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -152,58 +145,141 @@ function renderGrid() {
     }
 }
 
-/* ====================== DRAG-SWAP & HATA ====================== */
+/* ====================== CANLI SÜRÜKLEME (LIVE DRAG) & HATA ====================== */
 let dragIndex = null;
+let touchStartY = 0;
+let activeCell = null; // Şu an sürüklenen DOM elementi
 
 function startDrag(e) {
-    if(e.type === 'touchstart') e.preventDefault(); 
+    // Sadece sol tık veya dokunma
+    if (e.type === 'mousedown' && e.button !== 0) return;
     
-    // Etkileşim olduğu için ses motorunu uyandır (Tarayıcı politikası)
     if (audioCtx.state === 'suspended') audioCtx.resume();
 
     resetHintTimer();
     clearHints();
 
-    dragIndex = Number(e.target.dataset.i);
-    document.addEventListener("mouseup", endDrag);
-    document.addEventListener("touchend", endDrag);
+    // Tıklanan hedefi bul (sayıya tıklansa bile ana kutuyu al)
+    let target = e.target.closest('.cell');
+    if(!target) return;
+
+    activeCell = target;
+    dragIndex = Number(activeCell.dataset.i);
+
+    if(e.type === 'touchstart') {
+        // --- DOKUNMATİK BAŞLANGIÇ ---
+        touchStartY = e.touches[0].clientY;
+        // Parmağı takip etmesi için 'touchmove' dinleyicisi ekle
+        // passive: false önemli, çünkü preventDefault kullanacağız
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
+    } else {
+        // --- MOUSE BAŞLANGIÇ ---
+        document.addEventListener('mouseup', endDragMouse);
+    }
 }
 
-async function endDrag(e) {
-    document.removeEventListener("mouseup", endDrag);
-    document.removeEventListener("touchend", endDrag);
+// --- CANLI TAKİP (TOUCHMOVE) ---
+function handleTouchMove(e) {
+    // Sayfanın kaymasını engelle (Scroll kill)
+    e.preventDefault(); 
+    
+    if(!activeCell) return;
 
-    let clientX, clientY;
-    if(e.type === 'touchend') {
-        clientX = e.changedTouches[0].clientX;
-        clientY = e.changedTouches[0].clientY;
-    } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
+    // Parmağın anlık konumu ve başlangıca göre farkı
+    let currentY = e.touches[0].clientY;
+    let diffY = currentY - touchStartY;
+
+    // Görsel Geri Bildirim: Kutucuğu parmakla beraber hareket ettir
+    // Maksimum 100px yukarı veya aşağı gitmesine izin ver (Görsel sınır)
+    let moveY = Math.max(-100, Math.min(100, diffY));
+    
+    // CSS transform ile anlık konumlandırma
+    activeCell.style.transform = `translateY(${moveY}px)`;
+    activeCell.style.zIndex = 100; // Diğerlerinin üzerinde görünsün
+    // CSS geçişlerini geçici olarak kapat ki anlık tepki versin
+    activeCell.style.transition = 'none';
+}
+
+// --- DOKUNMA BİTİŞ (TOUCHEND) ---
+async function handleTouchEnd(e) {
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+
+    if(!activeCell) return;
+
+    // Bırakılan yerdeki son parmak pozisyonu
+    let endY = e.changedTouches[0].clientY;
+    let diffY = endY - touchStartY;
+    
+    // Görsel değişiklikleri sıfırla (CSS eski haline dönsün)
+    activeCell.style.transform = ''; 
+    activeCell.style.zIndex = '';
+    activeCell.style.transition = ''; // Transition'ı geri aç
+
+    // EŞİK DEĞERİ: En az 40 piksel sürüklenmiş olmalı
+    const SWIPE_THRESHOLD = 40;
+    let targetIndex = null;
+
+    // Aşağı mı Yukarı mı?
+    if (diffY > SWIPE_THRESHOLD) {
+        // AŞAĞI SWIPE -> Alt komşu var mı?
+        if (dragIndex + COLS < ROWS * COLS) {
+            targetIndex = dragIndex + COLS;
+        }
+    } else if (diffY < -SWIPE_THRESHOLD) {
+        // YUKARI SWIPE -> Üst komşu var mı?
+        if (dragIndex - COLS >= 0) {
+            targetIndex = dragIndex - COLS;
+        }
     }
+
+    activeCell = null; // Temizle
+
+    // Geçerli bir hedef varsa işlemi yap
+    if (targetIndex !== null) {
+        await executeMove(dragIndex, targetIndex);
+    } else {
+        // Hamle yapılmadı, ipucunu tekrar başlat
+        resetHintTimer();
+    }
+}
+
+// --- MOUSE BİTİŞ (ESKİ MANTIK) ---
+async function endDragMouse(e) {
+    document.removeEventListener('mouseup', endDragMouse);
+    activeCell = null;
+
+    let clientX = e.clientX;
+    let clientY = e.clientY;
 
     let target = document.elementFromPoint(clientX, clientY);
-    if (!target || !target.classList.contains("cell")) {
-        resetHintTimer();
-        return;
-    }
+    if (!target) { resetHintTimer(); return; }
+    
+    target = target.closest('.cell');
+    if(!target) { resetHintTimer(); return; }
 
     let dropIndex = Number(target.dataset.i);
 
     if (Math.abs(dragIndex - dropIndex) === COLS) {
-        playSound('move'); // Hamle sesi
-        await softSwap(dragIndex, dropIndex);
-        
-        let matches = findMatches();
-        if (matches.length > 0) {
-            await processMove();
-        } else {
-            playSound('error'); // Hata sesi
-            await triggerErrorEffect();
-            await softSwap(dragIndex, dropIndex); 
-            resetHintTimer();
-        }
+        await executeMove(dragIndex, dropIndex);
     } else {
+        resetHintTimer();
+    }
+}
+
+// --- ORTAK HAMLE ÇALIŞTIRICI (Touch ve Mouse için) ---
+async function executeMove(fromIdx, toIdx) {
+    playSound('move'); // Hamle sesi
+    await softSwap(fromIdx, toIdx);
+    
+    let matches = findMatches();
+    if (matches.length > 0) {
+        await processMove();
+    } else {
+        playSound('error'); // Hata sesi
+        await triggerErrorEffect();
+        await softSwap(fromIdx, toIdx); // Geri al
         resetHintTimer();
     }
 }
@@ -251,7 +327,6 @@ function showHint() {
     let move = findPossibleMove();
     
     if(move) {
-        // İpucu ses efektini çal
         playSound('hint');
 
         globalScore -= 8;
@@ -352,7 +427,6 @@ function popRow(r) {
         earnedPoints += point;
     }
     
-    // Ses Çal: Bonus varsa özel ses, yoksa normal patlama
     if (hasBonus) playSound('bonus');
     else playSound('pop');
 
@@ -452,7 +526,7 @@ async function processMove() {
 
         if (totalPopped >= 24) {
             await delay(500);
-            playSound('win'); // Zafer sesi
+            playSound('win'); 
             showVictory();
             return;
         }
@@ -483,7 +557,6 @@ async function startLevel(lvl) {
     let gameEl = document.getElementById("game");
     gameEl.style.display = "flex";
     
-    // Açılış Animasyonu (Büyüme Efekti - KORUNDU)
     gameEl.classList.remove("game-enter");
     void gameEl.offsetWidth; 
     gameEl.classList.add("game-enter");
