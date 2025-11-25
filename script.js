@@ -315,7 +315,7 @@ function softSwap(a, b) {
 /* ====================== İPUCU SİSTEMİ ====================== */
 function resetHintTimer() {
     if(hintTimer) clearTimeout(hintTimer);
-    hintTimer = setTimeout(showHint, 15000);
+    hintTimer = setTimeout(showHint, 25000);
 }
 
 function clearHints() {
@@ -329,7 +329,7 @@ function showHint() {
     if(move) {
         playSound('hint');
 
-        globalScore -= 8;
+        globalScore -= 15;
         localStorage.setItem("carpanTarlasi_score", globalScore);
         updateScoreUI();
         
@@ -632,3 +632,4 @@ function createStars() {
         bg.appendChild(star);
     }
 }
+
